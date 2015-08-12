@@ -14,7 +14,7 @@ The goal of this technical excercise is to create a new node in the [NodeRED](ht
 4. Add the node to NodeRED.
 5. Submit a pull request with your changes.
 
-## Node Design Specifications
+## Sanitizer Node Specifications
 
 * The sanitizer node should take a JSON object in **msg.payload**, sanitize it based on a user-defined configuration, and then send the sanitized object on **msg.payload**.
 * The sanitizer node's edit template (defined in sanitizer.html) should allow the user to specify an object configuration. This configuration will define how the object passed on **msg.payload** is sanitized. The built-in [switch node](https://github.com/node-red/node-red/blob/master/nodes/core/logic/10-switch.html) should provide a good starting point for building the sanitizer node's edit template.
