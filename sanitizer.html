@@ -159,7 +159,7 @@
                 //Create the new user input
                 // console.log($($('.node-property'))[0]);
                 console.log(propertyObject);
-                $('#properties').append(propertyObject.clone());
+                $('#properties').append(propertyObject.clone(true));
             });
 
             $('.node-remove-property').click(function(){
@@ -228,7 +228,7 @@
                 }
                 node.rules.push(r);
             });
-            node.outputs = node.rules.length;
+            //node.outputs = node.rules.length;
         }
     });
 </script>
