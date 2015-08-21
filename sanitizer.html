@@ -97,6 +97,10 @@
                 var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top: 7px; margin-left: 5px;"}).appendTo(finalspan);
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
                 selectField.change(function() {
+                    // console.log("changed" + selectField);
+                    console.log('here...changing');
+                    console.log('rule key: ' + rule.key);
+                    propertyName.siblings('.node-input-property').val(rule.key);
                     var type = selectField.children("option:selected").val();
                     if (type.length < 4) {
                         selectField.css({"width":"60px"});
@@ -199,7 +203,7 @@
                 }
                 node.rules.push(r);
             });
-            node.outputs = node.rules.length;
+            //node.outputs = node.rules.length;
         }
     });
 </script>
