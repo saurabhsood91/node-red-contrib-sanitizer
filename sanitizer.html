@@ -11,29 +11,19 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="node-sanitizer">
+<script type="text/x-red" data-template-name="node-sanitize">
     <div class="form-row">
-            <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-            <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
-    </div>  
-        <div class="form-row">
-            <span data-i18n="switch.label.property"></span> msg.<input type="text" id="node-input-property" style="width: 200px;"/>
-            <a href="#" class="editor-button editor-button-small" id="node-input-add-property" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span>add property</span></a>
-        </div>
-  <div id="properties">
-    <div class="node-property" id="payload">
-        <b class="node-property-title">msg.payload</b>
-        <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
-            <div class="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 310px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
-                <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;"></ol>
-            </div>
-        </div>
-      <div class="form-row">
-          <a href="#" class="node-input-add-rule editor-button editor-button-small" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
-            <a href="#" class="node-remove-property editor-button editor-button-small" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span>remove property</span></a>
-      </div>
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-  </div>
+    <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
+        <div id="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 310px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+            <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;"></ol>
+        </div>
+    </div>
+    <div class="form-row">
+        <a href="#" class="editor-button editor-button-small" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
+    </div>
     <div class="form-row">
         <select id="node-input-checkall" style="width:100%; margin-right:5px;">
             <option value="true" data-i18n="switch.checkall"></option>
@@ -42,7 +32,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="node-sanitizer">
+<script type="text/x-red" data-help-name="node-sanitize">
     <p>A simple function node to route messages based on its properties.</p>
     <p>When a message arrives, the selected property is evaluated against each
     of the defined rules. The message is then sent to the output of <i>all</i>
@@ -51,7 +41,7 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('node-sanitizer', {
+    RED.nodes.registerType('node-sanitize', {
         color: "#E2D96E",
         category: 'function',
         defaults: {
@@ -65,7 +55,7 @@
         outputs: 1,
         icon: "switch.png",
         label: function() {
-            return this.name||"node-sanitizer";
+            return this.name||"node-sanitize";
         },
         oneditprepare: function() {
             var operators = [
@@ -84,12 +74,14 @@
                 {v:"nnull",t:this._("switch.rules.nnull")},
                 {v:"else",t:this._("switch.rules.else")}
             ];
-            var propertyObject = $($($('.node-property'))[0]);
-            console.log(propertyObject);
-            function generateRule(i,rule, that) {
+            function generateRule(i,rule) {
                 var container = $('<li/>',{style:"background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
                 var row = $('<div/>').appendTo(container);
                 var row2 = $('<div/>',{style:"padding-top: 5px; text-align: right;"}).appendTo(container);
+
+                //Create new text field
+                var propertyName = $('<span data-i18n="switch.label.property"></span> msg.payload.<input type="text" class="node-input-property" style="width: 200px;"/>').appendTo(row);
+
                 $('<i style="color: #eee; cursor: move;" class="node-input-rule-handle fa fa-bars"></i>').appendTo(row);
                 var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(row);
                 for (var d in operators) {
@@ -129,17 +121,12 @@
                     container.css({"background":"#fee"});
                     container.fadeOut(300, function() {
                         $(this).remove();
-                        $(this).closest('.node-property').find(".node-input-rule-container").children().each(function(i) {
+                        $("#node-input-rule-container").children().each(function(i) {
                             $(this).find(".node-input-rule-index").html(i+1);
                         });
                     });
                 });
-                // console.log(that);
-                // console.log($(that));
-                // console.log($(that).closest('.node-property'));
-                $(that).closest('.node-property').find(".node-input-rule-container-div ol").append(container);
-
-                // $(this).closest('.node-property').find("#node-input-rule-container").append(container);
+                $("#node-input-rule-container").append(container);
                 selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
                 if (rule.t == "btwn") {
                     btwnValueField.val(rule.v);
@@ -149,39 +136,9 @@
                 }
                 selectField.change();
             }
-            $(".node-input-add-rule").click(function() {
-              var that = this;
-              var div = $(that).closest('.node-property').find(".node-input-rule-container-div");
-                generateRule($('.node-input-rule-container-div ol').children().length+1,{t:"",v:"",v2:""}, that);
-
-                div.scrollTop(div.get(0).scrollHeight);
-            });
-            $("#node-input-add-property").click(function(){
-                //Create the new user input
-                // console.log($($('.node-property'))[0]);
-                console.log('here');
-                var newId = $('#node-input-property').val().replace(/\./g,'_');
-                if($('#' + newId).length > 0) {
-                    //Show a warning message
-                    //Already created that property
-                    console.log('already added ' + newId);
-
-                } else {
-                    console.log(propertyObject);
-                    var newProperty = propertyObject.clone(true);
-                    newProperty.find('.node-property-title').text(newId.replace(/_/g, "."));
-                    newProperty.attr('id', newId);
-                    $('#properties').append(newProperty);
-                }
-
-            });
-
-            $('.node-remove-property').click(function(){
-                //Remove the closest property class
-                //console.log($(this));
-                console.log('.node-property');
-                $(this).closest('.node-property').remove();
-
+            $("#node-input-add-rule").click(function() {
+                generateRule($("#node-input-rule-container").children().length+1,{t:"",v:"",v2:""});
+                $("#node-input-rule-container-div").scrollTop($("#node-input-rule-container-div").get(0).scrollHeight);
             });
             for (var i=0;i<this.rules.length;i++) {
                 var rule = this.rules[i];
@@ -223,15 +180,15 @@
             });
         },
         oneditsave: function() {
-          console.log('something...');
-            var rules = $(".node-input-rule-container-div ol").children();
+            var rules = $("#node-input-rule-container").children();
             var ruleset;
             var node = this;
             node.rules= [];
             rules.each(function(i) {
                 var rule = $(this);
+                var keyName = rule.find('.node-input-property').val();
                 var type = rule.find("select option:selected").val();
-                var r = {t:type};
+                var r = {t:type, key:keyName};
                 if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
                     if (type === "btwn") {
                         r.v = rule.find(".node-input-rule-btwn-value").val();
@@ -242,7 +199,7 @@
                 }
                 node.rules.push(r);
             });
-            //node.outputs = node.rules.length;
+            node.outputs = node.rules.length;
         }
     });
 </script>
