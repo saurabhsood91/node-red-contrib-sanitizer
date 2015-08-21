@@ -13,13 +13,13 @@
 
 <script type="text/x-red" data-template-name="node-sanitizer">
   <div id="properties">
-    <div class="node-property">
-        <div class="form-row">
+    <div class="form-row">
             <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
             <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
             <a href="#" class="node-remove-property editor-button editor-button-small" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span>remove property</span></a>
             <a href="#" class="editor-button editor-button-small" id="node-input-add-property" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span>add property</span></a>
         </div>
+    <div class="node-property">
         <div class="form-row">
             <span data-i18n="switch.label.property"></span> msg.<input type="text" id="node-input-property" style="width: 200px;"/>
         </div>
@@ -83,6 +83,8 @@
                 {v:"nnull",t:this._("switch.rules.nnull")},
                 {v:"else",t:this._("switch.rules.else")}
             ];
+            var propertyObject = $($($('.node-property'))[0]);
+            console.log(propertyObject);
             function generateRule(i,rule, that) {
                 var container = $('<li/>',{style:"background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
                 var row = $('<div/>').appendTo(container);
@@ -134,7 +136,7 @@
                 // console.log(that);
                 // console.log($(that));
                 // console.log($(that).closest('.node-property'));
-                $(that).closest('.node-property').find(".node-input-rule-container-div").append(container);
+                $(that).closest('.node-property').find(".node-input-rule-container-div ol").append(container);
 
                 // $(this).closest('.node-property').find("#node-input-rule-container").append(container);
                 selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
@@ -149,15 +151,15 @@
             $(".node-input-add-rule").click(function() {
               var that = this;
               var div = $(that).closest('.node-property').find(".node-input-rule-container-div");
-              console.log(div);
-                generateRule(div.children().length+1,{t:"",v:"",v2:""}, that);
+                generateRule($('.node-input-rule-container-div ol').children().length+1,{t:"",v:"",v2:""}, that);
 
                 div.scrollTop(div.get(0).scrollHeight);
             });
             $("#node-input-add-property").click(function(){
                 //Create the new user input
                 // console.log($($('.node-property'))[0]);
-                $('#properties').append($($($('.node-property'))[0]).clone(true));
+                console.log(propertyObject);
+                $('#properties').append(propertyObject.clone());
             });
 
             $('.node-remove-property').click(function(){
