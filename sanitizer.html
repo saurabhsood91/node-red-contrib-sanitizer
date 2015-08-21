@@ -12,17 +12,17 @@
 -->
 
 <script type="text/x-red" data-template-name="node-sanitizer">
-  <div id="properties">
     <div class="form-row">
             <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
             <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
-            <a href="#" class="editor-button editor-button-small" id="node-input-add-property" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span>add property</span></a>
-        </div>
-    <div class="node-property">
+    </div>  
         <div class="form-row">
             <span data-i18n="switch.label.property"></span> msg.<input type="text" id="node-input-property" style="width: 200px;"/>
-            <a href="#" class="node-remove-property editor-button editor-button-small" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span>remove property</span></a>
+            <a href="#" class="editor-button editor-button-small" id="node-input-add-property" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span>add property</span></a>
         </div>
+  <div id="properties">
+    <div class="node-property" id="payload">
+        <b class="node-property-title">msg.payload</b>
         <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
             <div class="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 310px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
                 <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;"></ol>
@@ -30,6 +30,7 @@
         </div>
       <div class="form-row">
           <a href="#" class="node-input-add-rule editor-button editor-button-small" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
+            <a href="#" class="node-remove-property editor-button editor-button-small" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span>remove property</span></a>
       </div>
     </div>
   </div>
@@ -158,8 +159,21 @@
             $("#node-input-add-property").click(function(){
                 //Create the new user input
                 // console.log($($('.node-property'))[0]);
-                console.log(propertyObject);
-                $('#properties').append(propertyObject.clone(true));
+                console.log('here');
+                var newId = $('#node-input-property').val().replace(/\./g,'_');
+                if($('#' + newId).length > 0) {
+                    //Show a warning message
+                    //Already created that property
+                    console.log('already added ' + newId);
+
+                } else {
+                    console.log(propertyObject);
+                    var newProperty = propertyObject.clone(true);
+                    newProperty.find('.node-property-title').text(newId.replace(/_/g, "."));
+                    newProperty.attr('id', newId);
+                    $('#properties').append(newProperty);
+                }
+
             });
 
             $('.node-remove-property').click(function(){
