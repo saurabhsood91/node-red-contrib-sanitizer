@@ -38,7 +38,6 @@ module.exports = function(RED) {
         this.rules = n.rules || [];
         this.property = n.property;
         this.checkall = n.checkall || "true";
-        var propertyParts = (n.property || "payload").split(".");
         var node = this;
 
         for (var i=0; i<this.rules.length; i+=1) {
@@ -51,27 +50,51 @@ module.exports = function(RED) {
 
         this.on('input', function (msg) {
             var onward = [];
+            console.log("Message: ", msg);
+            console.log("Rules: ", node.rules);
             try {
-                var prop = propertyParts.reduce(function (obj, i) {
-                    return obj[i]
-                }, msg);
+                // var prop = propertyParts.reduce(function (obj, i) {
+                //     return obj[i]
+                // }, msg);
+                // console.log("Prop: ", prop);
                 var elseflag = true;
                 for (var i=0; i<node.rules.length; i+=1) {
+
+                    //Get the Key
+                    var key = node.rules[i].key;
+                    console.log('Key is: ' + key);
+                    var propertyParts = ["payload"];
+                    var keyParts = key.split('.');
+                    for(var subPartIndex = 0; subPartIndex < keyParts.length; subPartIndex++) {
+                        //Append to property parts array
+                        console.log("Subpart: " + subPartIndex);
+                        propertyParts.push(keyParts[subPartIndex]);
+                    }
+
+                    var prop = propertyParts.reduce(function (obj, i) {
+                        return obj[i]
+                    }, msg);
+
+                    console.log("Property: " + prop);
+
                     var rule = node.rules[i];
                     var test = prop;
                     if (rule.t == "else") { test = elseflag; elseflag = true; }
                     if (operators[rule.t](test,rule.v, rule.v2)) {
-                        onward.push(msg);
+                        console.log("Operation Passed");
                         elseflag = false;
                         if (node.checkall == "false") { break; }
                     } else {
+                        console.log("Operation Failed");
                         onward.push(null);
+                        return;
                     }
                 }
-                this.send(onward);
             } catch(err) {
                 node.warn(err);
             }
+            onward.push(msg);
+            this.send(onward);
         });
     }
     RED.nodes.registerType("node-sanitize", SwitchNode);
