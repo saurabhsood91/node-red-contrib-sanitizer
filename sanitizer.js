@@ -79,13 +79,39 @@ module.exports = function(RED) {
 
                     var rule = node.rules[i];
                     var test = prop;
+
+                    //Check Types
+                    var typeTestValue = typeof test;
+                    var typeRuleValue1 = typeof rule.v;
+                    var typeRuleValue2 = typeof rule.v2;
+                    
+                    console.log("Test Value Type: " + typeTestValue);
+                    console.log("Test Value 1: " + typeRuleValue1);
+                    console.log("Test Value 2: " + typeRuleValue2);
+
+                    if(typeRuleValue1 != "undefined" && typeRuleValue2 != "undefined") {
+                        // In that case check both types
+                        if(typeTestValue != typeRuleValue1 || typeTestValue != typeRuleValue2) {
+                            this.error("Data types don't match");
+                            return;
+                        }
+                    } else if(typeRuleValue2 == "undefined") {
+                        //Check the first value
+                        if(typeTestValue != typeRuleValue1) {
+                            this.error("Data types don't match");
+                            return;
+                        }
+                    }
+
                     if (rule.t == "else") { test = elseflag; elseflag = true; }
                     if (operators[rule.t](test,rule.v, rule.v2)) {
+                        this.log("Values match");
                         console.log("Operation Passed");
                         elseflag = false;
                         if (node.checkall == "false") { break; }
                     } else {
                         console.log("Operation Failed");
+                        this.error("Values don't match");
                         onward.push(null);
                         return;
                     }
