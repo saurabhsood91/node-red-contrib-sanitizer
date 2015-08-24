@@ -33,7 +33,7 @@ module.exports = function(RED) {
         'else': function(a) { return a === true; }
     };
 
-    function SwitchNode(n) {
+    function SanitizeNode(n) {
         RED.nodes.createNode(this, n);
         this.rules = n.rules || [];
         this.property = n.property;
@@ -125,5 +125,5 @@ module.exports = function(RED) {
             node.send(onward);
         });
     }
-    RED.nodes.registerType("node-sanitize", SwitchNode);
+    RED.nodes.registerType("node-sanitize", SanitizeNode);
 }
