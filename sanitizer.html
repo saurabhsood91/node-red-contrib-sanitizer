@@ -33,11 +33,10 @@
 </script>
 
 <script type="text/x-red" data-help-name="node-sanitize">
-    <p>A simple function node to route messages based on its properties.</p>
-    <p>When a message arrives, the selected property is evaluated against each
-    of the defined rules. The message is then sent to the output of <i>all</i>
-    rules that pass.</p>
-    <p>Note: the <i>otherwise</i> rule applies as a "not any of" the rules preceding it.</p>
+    <p>A function node to sanitize an incoming JSON object</p>
+    <p>When a message arrives, it checks if JSON data has been received, or tries to convert the message payload to a JSON object</p>
+    <p>Based on the constraint rules defined in the edit template, the node tries to validate the contents of the JSON object agains the defined rules. </p>
+    <p>If the rules pass, then the value is passed on to the next node </p>
 </script>
 
 <script type="text/javascript">
@@ -53,7 +52,7 @@
         },
         inputs: 1,
         outputs: 1,
-        icon: "switch.png",
+        icon: "alert.png",
         label: function() {
             return this.name||"node-sanitize";
         },
@@ -79,7 +78,7 @@
                 var row = $('<div/>').appendTo(container);
                 var row2 = $('<div/>',{style:"padding-top: 5px; text-align: right;"}).appendTo(container);
 
-                //Create new text field
+                //Create new text field which will have property/key name
                 var propertyName = $('<span data-i18n="switch.label.property"></span> msg.payload.<input type="text" class="node-input-property" style="width: 200px;"/>').appendTo(row);
 
                 $('<i style="color: #eee; cursor: move;" class="node-input-rule-handle fa fa-bars"></i>').appendTo(row);
@@ -97,9 +96,7 @@
                 var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top: 7px; margin-left: 5px;"}).appendTo(finalspan);
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
                 selectField.change(function() {
-                    // console.log("changed" + selectField);
-                    console.log('here...changing');
-                    console.log('rule key: ' + rule.key);
+                    // Restore value of the property when value changes/edit dialog is opened again
                     propertyName.siblings('.node-input-property').val(rule.key);
                     var type = selectField.children("option:selected").val();
                     if (type.length < 4) {
@@ -190,6 +187,7 @@
             node.rules= [];
             rules.each(function(i) {
                 var rule = $(this);
+                //Get the keyname from the UI
                 var keyName = rule.find('.node-input-property').val();
                 var type = rule.find("select option:selected").val();
                 var r = {t:type, key:keyName};
@@ -201,9 +199,9 @@
                         r.v = rule.find(".node-input-rule-value").val();
                     }
                 }
+                // Append the rule to the rules array
                 node.rules.push(r);
             });
-            //node.outputs = node.rules.length;
         }
     });
 </script>

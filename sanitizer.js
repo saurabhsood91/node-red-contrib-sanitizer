@@ -49,34 +49,41 @@ module.exports = function(RED) {
         }
 
         this.on('input', function (msg) {
+            // Get type of object payload
+            // If object type is not object, then try use JSON.parse to attempt
+            // conversion to JSON
+            if(typeof msg.payload != 'object') {
+                try {
+                    msg.payload = JSON.parse(msg.payload);
+                } catch(ex) {
+                    // Parsing failed
+                    // Throw an error and log it
+                    node.error('JSON parsing failed');
+                    return;
+                }
+            }
+
             var onward = [];
-            console.log("Message: ", msg);
-            console.log("Rules: ", node.rules);
             try {
-                // var prop = propertyParts.reduce(function (obj, i) {
-                //     return obj[i]
-                // }, msg);
-                // console.log("Prop: ", prop);
                 var elseflag = true;
                 for (var i=0; i<node.rules.length; i+=1) {
-
                     //Get the Key
                     var key = node.rules[i].key;
-                    console.log('Key is: ' + key);
+                    // As we are getting all data in payload
+                    // Initialize property parts to payload
                     var propertyParts = ["payload"];
                     var keyParts = key.split('.');
+                    //Append all the keys to get the final array of keys of any depth
                     for(var subPartIndex = 0; subPartIndex < keyParts.length; subPartIndex++) {
                         //Append to property parts array
-                        console.log("Subpart: " + subPartIndex);
                         propertyParts.push(keyParts[subPartIndex]);
                     }
-
+                    // Get the test value for which the rule is being tested
                     var prop = propertyParts.reduce(function (obj, i) {
                         return obj[i]
                     }, msg);
 
-                    console.log("Property: " + prop);
-
+                    //Get Current Rule
                     var rule = node.rules[i];
                     var test = prop;
 
@@ -84,34 +91,28 @@ module.exports = function(RED) {
                     var typeTestValue = typeof test;
                     var typeRuleValue1 = typeof rule.v;
                     var typeRuleValue2 = typeof rule.v2;
-                    
-                    console.log("Test Value Type: " + typeTestValue);
-                    console.log("Test Value 1: " + typeRuleValue1);
-                    console.log("Test Value 2: " + typeRuleValue2);
 
                     if(typeRuleValue1 != "undefined" && typeRuleValue2 != "undefined") {
                         // In that case check both types
                         if(typeTestValue != typeRuleValue1 || typeTestValue != typeRuleValue2) {
-                            this.error("Data types don't match");
+                            node.error("Data types don't match");
                             return;
                         }
                     } else if(typeRuleValue2 == "undefined") {
                         //Check the first value
                         if(typeTestValue != typeRuleValue1) {
-                            this.error("Data types don't match");
+                            node.error("Data types don't match");
                             return;
                         }
                     }
 
                     if (rule.t == "else") { test = elseflag; elseflag = true; }
                     if (operators[rule.t](test,rule.v, rule.v2)) {
-                        this.log("Values match");
-                        console.log("Operation Passed");
+                        node.log("Values match");
                         elseflag = false;
                         if (node.checkall == "false") { break; }
                     } else {
-                        console.log("Operation Failed");
-                        this.error("Values don't match");
+                        node.error("Values don't match");
                         onward.push(null);
                         return;
                     }
@@ -119,8 +120,9 @@ module.exports = function(RED) {
             } catch(err) {
                 node.warn(err);
             }
+            // In case all tests succeed, then pass the value onwards
             onward.push(msg);
-            this.send(onward);
+            node.send(onward);
         });
     }
     RED.nodes.registerType("node-sanitize", SwitchNode);
