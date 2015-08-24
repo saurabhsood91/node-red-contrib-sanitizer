@@ -83,6 +83,12 @@ module.exports = function(RED) {
                         return obj[i]
                     }, msg);
 
+                    // If prop is undefined, means that the key is not found in the object
+                    if(typeof prop == 'undefined') {
+                        node.error("Key "+ key +" not found in the message payload");
+                        return;
+                    }
+
                     //Get Current Rule
                     var rule = node.rules[i];
                     var test = prop;
